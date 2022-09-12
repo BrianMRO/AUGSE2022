@@ -1,0 +1,58 @@
+﻿using PX.Data;
+using System.Collections.Generic;
+using System.Linq;
+using EP = PX.Objects.EP;
+
+namespace AUGSE2022
+{
+    public class EPApprovalMapMaint_Extension : PXGraphExtension<EP.EPApprovalMapMaint>
+    {
+        public static bool IsActive() => true;
+
+        #region Override GetEntityTypeScreens - Enable Approval Maps for New Screens
+        public delegate IEnumerable<string> GetEntityTypeScreensDelegate();
+        [PXOverride]
+        public IEnumerable<string> GetEntityTypeScreens(GetEntityTypeScreensDelegate baseMethod)
+        {
+            IEnumerable<string> entities = baseMethod();
+            List<string> list = new List<string>();
+
+            foreach (string s in entities)
+            {
+                list.Add(s);
+            }
+            list.Add("ZZ301000"); // AUG SE 2022 Order Entry
+
+            return list;
+
+        }
+        #endregion
+
+        #region EPRule_RowSelected - Override to Enable Approve/Reject Reasons for New Graphs 
+        protected virtual void EPRule_RowSelected(PXCache sender, PXRowSelectedEventArgs e, PXRowSelected baseEvent)
+        {
+            baseEvent.Invoke(sender, e);
+
+            EP.EPRule row = e.Row as EP.EPRule;
+            if (row == null)
+                return;
+
+            bool isOfSupportedType = new List<string>()
+            {
+                typeof(EP.TimeCardMaint).FullName,
+                typeof(EP.EquipmentTimeCardMaint).FullName,
+                typeof(EP.ExpenseClaimEntry).FullName,
+                typeof(PX.Objects.PM.ProformaEntry).FullName,
+                typeof(PX.Objects.PM.ChangeOrderEntry).FullName,
+                typeof(PX.Objects.CR.QuoteMaint).FullName,
+                typeof(PX.Objects.PM.PMQuoteMaint).FullName,
+                typeof(AUGSE2022.AUGOrderEntry).FullName,
+            }.Contains(Base.AssigmentMap.Current?.GraphType, new PX.Data.CompareIgnoreCase());
+
+            PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForApprove>(Base.Nodes.Cache, Base.Nodes.Current, isOfSupportedType && row.StepID != null);
+            PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForReject>(Base.Nodes.Cache, Base.Nodes.Current, isOfSupportedType && row.StepID != null);
+        }
+        #endregion
+
+    }
+}
