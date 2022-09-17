@@ -31,26 +31,25 @@ namespace AUGSE2022
         #region EPRule_RowSelected - Override to Enable Approve/Reject Reasons for New Graphs 
         protected virtual void EPRule_RowSelected(PXCache sender, PXRowSelectedEventArgs e, PXRowSelected baseEvent)
         {
+            // The baseEvent will hide the Reason fields if not enabled in standard code
             baseEvent.Invoke(sender, e);
 
             EP.EPRule row = e.Row as EP.EPRule;
             if (row == null)
                 return;
 
-            bool isOfSupportedType = new List<string>()
+            // Add custom graphs that should enable reason fields for approval comments
+            bool isSupportedCustomType = new List<string>()
             {
-                typeof(EP.TimeCardMaint).FullName,
-                typeof(EP.EquipmentTimeCardMaint).FullName,
-                typeof(EP.ExpenseClaimEntry).FullName,
-                typeof(PX.Objects.PM.ProformaEntry).FullName,
-                typeof(PX.Objects.PM.ChangeOrderEntry).FullName,
-                typeof(PX.Objects.CR.QuoteMaint).FullName,
-                typeof(PX.Objects.PM.PMQuoteMaint).FullName,
                 typeof(AUGSE2022.AUGOrderEntry).FullName,
             }.Contains(Base.AssigmentMap.Current?.GraphType, new PX.Data.CompareIgnoreCase());
 
-            PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForApprove>(Base.Nodes.Cache, Base.Nodes.Current, isOfSupportedType && row.StepID != null);
-            PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForReject>(Base.Nodes.Cache, Base.Nodes.Current, isOfSupportedType && row.StepID != null);
+            // Make Reason Fields Visible for Custom Screens
+            if(isSupportedCustomType == true)
+            {
+                PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForApprove>(Base.Nodes.Cache, Base.Nodes.Current, isSupportedCustomType && row.StepID != null);
+                PXUIFieldAttribute.SetVisible<EP.EPRule.reasonForReject>(Base.Nodes.Cache, Base.Nodes.Current, isSupportedCustomType && row.StepID != null);
+            }
         }
         #endregion
 
