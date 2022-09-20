@@ -25,7 +25,7 @@ namespace AUGSE2022
                 using (PXDataRecord setup = PXDatabase.SelectSingle<AUGSetup>(new PXDataField<AUGSetup.requestApproval>()))
                 {
                     if (setup != null)
-                        requestApproval = (bool)setup.GetBoolean(0);
+                        requestApproval = ((bool?)setup.GetBoolean(0) == true);
                 }
             }
 
