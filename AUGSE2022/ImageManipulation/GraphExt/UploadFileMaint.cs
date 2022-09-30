@@ -66,7 +66,7 @@ namespace AUGSE2022
                         string NewName = "image-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".jpg";
 
                         attachment.FullName = attachment.FullName.Substring(0, attachment.FullName.Length - 9) + NewName;
-                        file.Name = NewName;
+                        file.Name = file.Name.Substring(0, file.Name.Length - 9) + NewName;
                     }
 
                     // Resize jpg files to a max height/width... 1920 pixels by default
